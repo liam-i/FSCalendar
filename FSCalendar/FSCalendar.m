@@ -85,10 +85,6 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
 
 - (CGSize)sizeThatFits:(CGSize)size scope:(FSCalendarScope)scope;
 
-- (void)scrollToDate:(NSDate *)date;
-- (void)scrollToDate:(NSDate *)date animated:(BOOL)animated;
-- (void)scrollToPageForDate:(NSDate *)date animated:(BOOL)animated;
-
 - (BOOL)isPageInRange:(NSDate *)page;
 - (BOOL)isDateInRange:(NSDate *)date;
 - (BOOL)isDateSelected:(NSDate *)date;
@@ -241,6 +237,12 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
 }
 
 #pragma mark - Overriden methods
+/**
+ * Liam li
+ */
+- (void)setContentInsetAdjustmentBehavior:(UIScrollViewContentInsetAdjustmentBehavior)contentInsetAdjustmentBehavior {
+    _collectionView.contentInsetAdjustmentBehavior = contentInsetAdjustmentBehavior;
+}
 
 - (void)setBounds:(CGRect)bounds
 {
@@ -569,7 +571,7 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
         if (![self.gregorian isDate:currentPage equalToDate:_currentPage toUnitGranularity:NSCalendarUnitMonth]) {
             [self willChangeValueForKey:@"currentPage"];
             _currentPage = currentPage;
-            [self.delegateProxy calendarCurrentPageDidChange:self];
+            [self.delegateProxy calendarCurrentPageDidChange:self forChangeType:FSCalendarCurrentPageDidChangeTypeScrollViewDidScroll];
             [self didChangeValueForKey:@"currentPage"];
         }
         
@@ -627,7 +629,7 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
         NSDate *lastPage = _currentPage;
         [self willChangeValueForKey:@"currentPage"];
         _currentPage = targetPage;
-        [self.delegateProxy calendarCurrentPageDidChange:self];
+        [self.delegateProxy calendarCurrentPageDidChange:self forChangeType:FSCalendarCurrentPageDidChangeTypeScrollViewWillEndDragging];
         if (_placeholderType != FSCalendarPlaceholderTypeFillSixRows) {
             [self.transitionCoordinator performBoundingRectTransitionFromMonth:lastPage toMonth:_currentPage duration:0.25];
         }
@@ -1035,9 +1037,16 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
     [self selectDate:date scrollToDate:YES];
 }
 
-- (void)selectDate:(NSDate *)date scrollToDate:(BOOL)scrollToDate
+- (void)selectDate:(NSDate *)date scrollToDate:(BOOL)scrollToDate {
+    [self selectDate:date scrollToDate:scrollToDate animated:YES];
+}
+
+/**
+ * Liam li
+ */
+- (void)selectDate:(NSDate *)date scrollToDate:(BOOL)scrollToDate animated:(BOOL)animated
 {
-    [self selectDate:date scrollToDate:scrollToDate atMonthPosition:FSCalendarMonthPositionCurrent];
+    [self selectDate:date scrollToDate:scrollToDate atMonthPosition:FSCalendarMonthPositionCurrent animated:animated];
 }
 
 - (void)deselectDate:(NSDate *)date
@@ -1057,7 +1066,14 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
     }
 }
 
-- (void)selectDate:(NSDate *)date scrollToDate:(BOOL)scrollToDate atMonthPosition:(FSCalendarMonthPosition)monthPosition
+- (void)selectDate:(NSDate *)date scrollToDate:(BOOL)scrollToDate atMonthPosition:(FSCalendarMonthPosition)monthPosition {
+    [self selectDate:date scrollToDate:scrollToDate atMonthPosition:monthPosition animated:YES];
+}
+
+/**
+ * Liam li
+ */
+- (void)selectDate:(NSDate *)date scrollToDate:(BOOL)scrollToDate atMonthPosition:(FSCalendarMonthPosition)monthPosition animated:(BOOL)animated
 {
     if (!self.allowsSelection || !date) return;
         
@@ -1121,7 +1137,10 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
         if (!shouldSelect) {
             return;
         }
-        [self scrollToPageForDate:targetDate animated:YES];
+        /**
+         * Liam li
+         */
+        [self scrollToPageForDate:targetDate animated:animated];
     }
 }
 
@@ -1164,6 +1183,12 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
         [_collectionViewLayout layoutAttributesForElementsInRect:_collectionView.bounds];
         CGRect headerFrame = [_collectionViewLayout layoutAttributesForSupplementaryViewOfKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:scrollOffset]].frame;
         CGPoint targetOffset = CGPointMake(0, MIN(headerFrame.origin.y,MAX(0,_collectionViewLayout.collectionViewContentSize.height-_collectionView.fs_bottom)));
+        /**
+         * Liam li
+         */
+        if (_pagingEnabled == NO) {
+            targetOffset.y -= self.safeAreaInsets.top;
+        }
         [_collectionView setContentOffset:targetOffset animated:animated];
     }
     if (!animated) {
@@ -1194,7 +1219,7 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
                 }
             }
             if (self.hasValidateVisibleLayout) {
-                [self.delegateProxy calendarCurrentPageDidChange:self];
+                [self.delegateProxy calendarCurrentPageDidChange:self forChangeType:FSCalendarCurrentPageDidChangeTypeScrollToPageForDate];
                 if (_placeholderType != FSCalendarPlaceholderTypeFillSixRows && self.transitionCoordinator.state == FSCalendarTransitionStateIdle) {
                     [self.transitionCoordinator performBoundingRectTransitionFromMonth:lastPage toMonth:_currentPage duration:0.33];
                 }
@@ -1375,6 +1400,14 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
         FSCalendarInvalidateCellAppearance(preferredSubtitleSelectionColor,subtitleSelectionColorForDate);
         FSCalendarInvalidateCellAppearanceWithDefault(preferredSubtitleOffset,subtitleOffsetForDate,CGPointInfinity);
     }
+
+    /**
+     * Liam li
+     */
+    if (cell.flag) {
+        FSCalendarInvalidateCellAppearance(preferredFlagColor,flagColorForDate);
+        FSCalendarInvalidateCellAppearance(preferredFlagBGColor,flagBGColorForDate);
+    }
     if (cell.numberOfEvents) {
         FSCalendarInvalidateCellAppearance(preferredEventDefaultColors,eventDefaultColorsForDate);
         FSCalendarInvalidateCellAppearance(preferredEventSelectionColors,eventSelectionColorsForDate);
@@ -1401,6 +1434,10 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
     cell.numberOfEvents = [self.dataSourceProxy calendar:self numberOfEventsForDate:date];
     cell.titleLabel.text = [self.dataSourceProxy calendar:self titleForDate:date] ?: @([self.gregorian component:NSCalendarUnitDay fromDate:date]).stringValue;
     cell.subtitle  = [self.dataSourceProxy calendar:self subtitleForDate:date];
+    /**
+     * Liam li
+     */
+    cell.flag = [self.dataSourceProxy calendar:self flagForDate:date];
     cell.selected = [_selectedDates containsObject:date];
     cell.dateIsToday = self.today?[self.gregorian isDate:date inSameDayAsDate:self.today]:NO;
     cell.weekend = [self.gregorian isDateInWeekend:date];

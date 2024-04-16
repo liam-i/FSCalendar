@@ -32,6 +32,10 @@
         
         _titleFont = [UIFont systemFontOfSize:FSCalendarStandardTitleTextSize];
         _subtitleFont = [UIFont systemFontOfSize:FSCalendarStandardSubtitleTextSize];
+        /**
+         * Liam li
+         */
+        _flagFont = [UIFont systemFontOfSize:7 weight:UIFontWeightLight];
         _weekdayFont = [UIFont systemFontOfSize:FSCalendarStandardWeekdayTextSize];
         _headerTitleFont = [UIFont systemFontOfSize:FSCalendarStandardHeaderTextSize];
         
@@ -94,6 +98,16 @@
 {
     if (![_subtitleFont isEqual:subtitleFont]) {
         _subtitleFont = subtitleFont;
+        [self.calendar configureAppearance];
+    }
+}
+
+/**
+ * Liam li
+ */
+- (void)setFlagFont:(UIFont *)flagFont {
+    if (![_flagFont isEqual:flagFont]) {
+        _flagFont = flagFont;
         [self.calendar configureAppearance];
     }
 }
@@ -193,6 +207,19 @@
     [self.calendar configureAppearance];
 }
 
+/**
+ * Liam li
+ */
+- (void)setTitleTodaySelectedColor:(UIColor *)color
+{
+    if (color) {
+        _titleColors[@(FSCalendarCellStateTodaySelected)] = color;
+    } else {
+        [_titleColors removeObjectForKey:@(FSCalendarCellStateTodaySelected)];
+    }
+    [self.calendar configureAppearance];
+}
+
 - (UIColor *)titleTodayColor
 {
     return _titleColors[@(FSCalendarCellStateToday)];
@@ -264,6 +291,19 @@
         _subtitleColors[@(FSCalendarCellStateToday)] = color;
     } else {
         [_subtitleColors removeObjectForKey:@(FSCalendarCellStateToday)];
+    }
+    [self.calendar configureAppearance];
+}
+
+/**
+ * Liam li
+ */
+- (void)setSubtitleTodaySelectedColor:(UIColor *)color
+{
+    if (color) {
+        _subtitleColors[@(FSCalendarCellStateTodaySelected)] = color;
+    } else {
+        [_subtitleColors removeObjectForKey:@(FSCalendarCellStateTodaySelected)];
     }
     [self.calendar configureAppearance];
 }

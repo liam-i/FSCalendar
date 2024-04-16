@@ -52,6 +52,12 @@ typedef NS_ENUM(NSUInteger, FSCalendarMonthPosition) {
     FSCalendarMonthPositionNotFound = NSNotFound
 };
 
+typedef NS_ENUM(NSUInteger, FSCalendarCurrentPageDidChangeType) {
+    FSCalendarCurrentPageDidChangeTypeScrollViewDidScroll,
+    FSCalendarCurrentPageDidChangeTypeScrollViewWillEndDragging,
+    FSCalendarCurrentPageDidChangeTypeScrollToPageForDate
+};
+
 NS_ASSUME_NONNULL_BEGIN
 
 @class FSCalendar;
@@ -72,6 +78,11 @@ NS_ASSUME_NONNULL_BEGIN
  * Asks the dataSource for a subtitle for the specific date under the day text.
  */
 - (nullable NSString *)calendar:(FSCalendar *)calendar subtitleForDate:(NSDate *)date;
+
+/**
+ * Liam li
+ */
+- (nullable NSString *)calendar:(FSCalendar *)calendar flagForDate:(NSDate *)date;
 
 /**
  * Asks the dataSource for an image for the specific date.
@@ -146,7 +157,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Tells the delegate the calendar is about to change the current page.
  */
-- (void)calendarCurrentPageDidChange:(FSCalendar *)calendar;
+- (void)calendarCurrentPageDidChange:(FSCalendar *)calendar forChangeType:(FSCalendarCurrentPageDidChangeType)changeType;
 
 @end
 
@@ -188,6 +199,14 @@ NS_ASSUME_NONNULL_BEGIN
  * Asks the delegate for subtitle text color in selected state for the specific date.
  */
 - (nullable UIColor *)calendar:(FSCalendar *)calendar appearance:(FSCalendarAppearance *)appearance subtitleSelectionColorForDate:(NSDate *)date;
+/**
+ * Liam li
+ */
+- (nullable UIColor *)calendar:(FSCalendar *)calendar appearance:(FSCalendarAppearance *)appearance flagColorForDate:(NSDate *)date;
+/**
+ * Liam li
+ */
+- (nullable UIColor *)calendar:(FSCalendar *)calendar appearance:(FSCalendarAppearance *)appearance flagBGColorForDate:(NSDate *)date;
 
 /**
  * Asks the delegate for event colors for the specific date.
@@ -434,6 +453,14 @@ IB_DESIGNABLE
  @param scrollToDate A Boolean value that determines whether the calendar should scroll to the selected date to visible area.
  */
 - (void)selectDate:(nullable NSDate *)date scrollToDate:(BOOL)scrollToDate;
+/**
+ * Liam li
+ */
+- (void)selectDate:(nullable NSDate *)date scrollToDate:(BOOL)scrollToDate animated:(BOOL)animated;
+
+- (void)scrollToDate:(NSDate *)date;
+- (void)scrollToDate:(NSDate *)date animated:(BOOL)animated;
+- (void)scrollToPageForDate:(NSDate *)date animated:(BOOL)animated NS_SWIFT_NAME(scrollToPage(for:animated:));
 
 /**
  Deselects a given date of the calendar.
@@ -457,6 +484,11 @@ IB_DESIGNABLE
  @param identifier The reuse identifier to associate with the specified class. This parameter must not be nil and must not be an empty string.
  */
 - (void)registerClass:(Class)cellClass forCellReuseIdentifier:(NSString *)identifier;
+
+/**
+ * Liam li
+ */
+- (void)setContentInsetAdjustmentBehavior:(UIScrollViewContentInsetAdjustmentBehavior)contentInsetAdjustmentBehavior;
 
 /**
  Returns a reusable calendar cell object located by its identifier.

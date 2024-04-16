@@ -63,6 +63,16 @@
     label.textColor = [UIColor lightGrayColor];
     [self.contentView addSubview:label];
     self.subtitleLabel = label;
+
+    /**
+     * Liam li
+     */
+    label = [[UILabel alloc] initWithFrame:CGRectZero];
+    label.textAlignment = NSTextAlignmentCenter;
+    label.numberOfLines = 0;
+    label.textColor = [UIColor lightGrayColor];
+    [self.contentView addSubview:label];
+    self.flagLabel = label;
     
     shapeLayer = [CAShapeLayer layer];
     shapeLayer.backgroundColor = [UIColor clearColor].CGColor;
@@ -101,27 +111,43 @@
             _subtitleLabel.hidden = YES;
         }
     }
+
+    /**
+     * Liam li
+     */
+    if (_flag) {
+        _flagLabel.text = _flag;
+        if (_flagLabel.hidden) {
+            _flagLabel.hidden = NO;
+        }
+
+        CGFloat flagHeight = self.flagLabel.font.lineHeight + 3;
+        _flagLabel.frame = CGRectMake(self.contentView.fs_width - flagHeight - 2, 0, flagHeight, flagHeight);
+        _flagLabel.layer.cornerRadius = flagHeight / 2.0;
+        _flagLabel.layer.masksToBounds = true;
+    } else {
+        if (!_flagLabel.hidden) {
+            _flagLabel.hidden = YES;
+        }
+    }
     
     if (_subtitle) {
         CGFloat titleHeight = self.titleLabel.font.lineHeight;
         CGFloat subtitleHeight = self.subtitleLabel.font.lineHeight;
-        
+
         CGFloat height = titleHeight + subtitleHeight;
-        _titleLabel.frame = CGRectMake(
-                                       self.preferredTitleOffset.x,
+        _titleLabel.frame = CGRectMake(self.preferredTitleOffset.x,
                                        (self.contentView.fs_height*5.0/6.0-height)*0.5+self.preferredTitleOffset.y,
                                        self.contentView.fs_width,
                                        titleHeight
                                        );
-        _subtitleLabel.frame = CGRectMake(
-                                          self.preferredSubtitleOffset.x,
+        _subtitleLabel.frame = CGRectMake(self.preferredSubtitleOffset.x,
                                           (_titleLabel.fs_bottom-self.preferredTitleOffset.y) - (_titleLabel.fs_height-_titleLabel.font.pointSize)+self.preferredSubtitleOffset.y,
                                           self.contentView.fs_width,
                                           subtitleHeight
                                           );
     } else {
-        _titleLabel.frame = CGRectMake(
-                                       self.preferredTitleOffset.x,
+        _titleLabel.frame = CGRectMake(self.preferredTitleOffset.x,
                                        self.preferredTitleOffset.y,
                                        self.contentView.fs_width,
                                        floor(self.contentView.fs_height*5.0/6.0)
@@ -131,7 +157,10 @@
     _imageView.frame = CGRectMake(self.preferredImageOffset.x, self.preferredImageOffset.y, self.contentView.fs_width, self.contentView.fs_height);
     
     CGFloat titleHeight = self.bounds.size.height*5.0/6.0;
-    CGFloat diameter = MIN(self.bounds.size.height*5.0/6.0,self.bounds.size.width);
+    /**
+     * Liam li
+     */
+    CGFloat diameter = MIN(titleHeight, self.bounds.size.width);
     diameter = diameter > FSCalendarStandardCellDiameter ? (diameter - (diameter-FSCalendarStandardCellDiameter)*0.5) : diameter;
     _shapeLayer.frame = CGRectMake((self.bounds.size.width-diameter)/2,
                                    (titleHeight-diameter)/2,
@@ -207,6 +236,24 @@
         titleFont = self.calendar.appearance.subtitleFont;
         if (![titleFont isEqual:_subtitleLabel.font]) {
             _subtitleLabel.font = titleFont;
+        }
+    }
+    /**
+     * Liam li
+     */
+    if (_flag) {
+        textColor = self.preferredFlagColor;
+        if (![textColor isEqual:_flagLabel.textColor]) {
+            _flagLabel.textColor = textColor;
+        }
+        textColor = self.preferredFlagBGColor;
+        if (![textColor isEqual:_flagLabel.textColor]) {
+            _flagLabel.backgroundColor = textColor;
+        }
+
+        titleFont = self.calendar.appearance.flagFont;
+        if (![titleFont isEqual:_flagLabel.font]) {
+            _flagLabel.font = titleFont;
         }
     }
     
@@ -364,6 +411,19 @@ OFFSET_PROPERTY(preferredEventOffset, PreferredEventOffset, _appearance.eventOff
     }
 }
 
+/**
+ * Liam li
+ */
+- (void)setFlag:(NSString *)flag {
+    if (![_flag isEqualToString:flag]) {
+        BOOL diff = (flag.length && !_flag.length) || (_flag.length && !flag.length);
+        _flag = flag;
+        if (diff) {
+            [self setNeedsLayout];
+        }
+    }
+}
+
 @end
 
 
@@ -381,11 +441,11 @@ OFFSET_PROPERTY(preferredEventOffset, PreferredEventOffset, _appearance.eventOff
 {
     self = [super initWithFrame:frame];
     if (self) {
-        
+
         UIView *view = [[UIView alloc] initWithFrame:CGRectZero];
         [self addSubview:view];
         self.contentView = view;
-        
+
         self.eventLayers = [NSPointerArray weakObjectsPointerArray];
         for (int i = 0; i < FSCalendarMaximumNumberOfEvents; i++) {
             CALayer *layer = [CALayer layer];
@@ -393,7 +453,7 @@ OFFSET_PROPERTY(preferredEventOffset, PreferredEventOffset, _appearance.eventOff
             [self.contentView.layer addSublayer:layer];
             [self.eventLayers addPointer:(__bridge void * _Nullable)(layer)];
         }
-        
+
     }
     return self;
 }
@@ -411,7 +471,7 @@ OFFSET_PROPERTY(preferredEventOffset, PreferredEventOffset, _appearance.eventOff
 {
     [super layoutSublayersOfLayer:layer];
     if (layer == self.layer) {
-        
+
         CGFloat diameter = MIN(MIN(self.fs_width, self.fs_height),FSCalendarMaximumEventDotDiameter);
         for (int i = 0; i < self.eventLayers.count; i++) {
             CALayer *eventLayer = [self.eventLayers pointerAtIndex:i];
@@ -430,7 +490,7 @@ OFFSET_PROPERTY(preferredEventOffset, PreferredEventOffset, _appearance.eventOff
 {
     if (![_color isEqual:color]) {
         _color = color;
-        
+
         if ([_color isKindOfClass:[UIColor class]]) {
             for (NSInteger i = 0; i < self.eventLayers.count; i++) {
                 CALayer *layer = [self.eventLayers pointerAtIndex:i];
@@ -443,7 +503,6 @@ OFFSET_PROPERTY(preferredEventOffset, PreferredEventOffset, _appearance.eventOff
                 eventLayer.backgroundColor = colors[MIN(i,colors.count-1)].CGColor;
             }
         }
-        
     }
 }
 
@@ -463,6 +522,3 @@ OFFSET_PROPERTY(preferredEventOffset, PreferredEventOffset, _appearance.eventOff
 - (void)configureAppearance {}
 
 @end
-
-
-

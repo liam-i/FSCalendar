@@ -27,6 +27,12 @@ typedef NS_ENUM(NSUInteger, FSCalendarMonthPosition);
  */
 @property (weak, nonatomic) UILabel  *subtitleLabel;
 
+/**
+ * The subtitle label of the cell
+ * Liam li
+ */
+@property (weak, nonatomic) UILabel  *flagLabel;
+
 
 /**
  The shape layer of the cell
@@ -55,6 +61,10 @@ typedef NS_ENUM(NSUInteger, FSCalendarMonthPosition);
 @property (weak, nonatomic) FSCalendarAppearance *appearance;
 
 @property (strong, nonatomic) NSString *subtitle;
+/**
+ * Liam li
+ */
+@property (strong, nonatomic) NSString *flag;
 @property (strong, nonatomic) UIImage  *image;
 @property (assign, nonatomic) FSCalendarMonthPosition monthPosition;
 
@@ -70,6 +80,14 @@ typedef NS_ENUM(NSUInteger, FSCalendarMonthPosition);
 @property (strong, nonatomic) UIColor *preferredSubtitleSelectionColor;
 @property (strong, nonatomic) UIColor *preferredBorderDefaultColor;
 @property (strong, nonatomic) UIColor *preferredBorderSelectionColor;
+/**
+ * Liam li
+ */
+@property (strong, nonatomic) UIColor *preferredFlagColor;
+/**
+ * Liam li
+ */
+@property (strong, nonatomic) UIColor *preferredFlagBGColor;
 @property (assign, nonatomic) CGPoint preferredTitleOffset;
 @property (assign, nonatomic) CGPoint preferredSubtitleOffset;
 @property (assign, nonatomic) CGPoint preferredImageOffset;
@@ -104,4 +122,3 @@ typedef NS_ENUM(NSUInteger, FSCalendarMonthPosition);
 - (void)configureAppearance;
 
 @end
-

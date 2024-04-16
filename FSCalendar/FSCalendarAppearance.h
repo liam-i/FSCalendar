@@ -53,6 +53,10 @@ typedef NS_OPTIONS(NSUInteger, FSCalendarCaseOptions) {
  * The font of the subtitle text.
  */
 @property (strong, nonatomic) UIFont   *subtitleFont;
+/**
+ * Liam li
+ */
+@property (strong, nonatomic) UIFont   *flagFont;
 
 /**
  * The font of the weekday text.
@@ -143,6 +147,10 @@ typedef NS_OPTIONS(NSUInteger, FSCalendarCaseOptions) {
  * The day text color for today in the calendar.
  */
 @property (strong, nonatomic) UIColor  *titleTodayColor;
+/**
+ * Liam li
+ */
+@property (strong, nonatomic) UIColor  *titleTodaySelectedColor;
 
 /**
  * The day text color for days out of current month.
@@ -168,6 +176,10 @@ typedef NS_OPTIONS(NSUInteger, FSCalendarCaseOptions) {
  * The subtitle text color for today in the calendar.
  */
 @property (strong, nonatomic) UIColor  *subtitleTodayColor;
+/**
+ * Liam li
+ */
+@property (strong, nonatomic) UIColor  *subtitleTodaySelectedColor;
 
 /**
  * The subtitle text color for days out of current month.
